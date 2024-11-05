@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Todo Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #3b82f6;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --background: #f8fafc;
+            --text: #1e293b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .app-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .todo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .todo-section {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .todo-section:hover {
+            transform: translateY(-4px);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 0.5rem;
+        }
+
+        .todo-form {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .todo-input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.25rem;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .todo-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+        }
+
+        .todo-list {
+            list-style: none;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background: #f8fafc;
+            margin-bottom: 0.5rem;
+            border-radius: 0.25rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        .todo-item:hover {
+            background: #f1f5f9;
+        }
+
+        .todo-checkbox {
+            margin-right: 0.75rem;
+            width: 1.2rem;
+            height: 1.2rem;
+            cursor: pointer;
+        }
+
+        .todo-text {
+            flex: 1;
+        }
+
+        .todo-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-icon:hover {
+            opacity: 1;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-btn {
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .priority-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+
+        .priority-high {
+            background: var(--danger);
+            color: white;
+        }
+
+        .priority-medium {
+            background: var(--warning);
+            color: white;
+        }
+
+        .priority-low {
+            background: var(--success);
+            color: white;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-1rem);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: var(--text);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .todo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1 class="app-title">Task Master Pro</h1>
+            <div class="filters">
+                <button class="filter-btn active">All</button>
+                <button class="filter-btn">Active</button>
+                <button class="filter-btn">Completed</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="stats animate__animated animate__fadeIn">
+            <div class="stat-card">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Total Tasks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">5</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">7</div>
+                <div class="stat-label">Remaining</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">3</div>
+                <div class="stat-label">High Priority</div>
+            </div>
+        </div>
+
+        <div class="todo-grid">
+            <section class="todo-section animate__animated animate__fadeIn">
+                <h2 class="section-title">Today's Tasks</h2>
+                <form class="todo-form">
+                    <input type="text" class="todo-input" placeholder="Add a new task...">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </form>
+                <ul class="todo-list">
+                    <li class="todo-item">
+                        <input type="checkbox" class="todo-checkbox">
+                        <span class="todo-text">Complete project presentation</span>
+                        <span class="priority-badge priority-high">High</span>
+                        <div class="todo-actions">
+                            <button class="btn-icon">📝</button>
+                            <button class="btn-icon">🗑️</button>
+                        </div>
+                    </li>
+                    <li class="todo-item">
+                        <input type="checkbox" class="todo-checkbox" checked>
+                        <span class="todo-text completed">Review team updates</span>
+                        <span class="priority-badge priority-medium">Medium</span>
+                        <div class="todo-actions">
+                            <button class="btn-icon">📝</button>
+                            <button class="btn-icon">🗑️</button>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="todo-section animate__animated animate__fadeIn">
+                <h2 class="section-title">Upcoming Tasks</h2>
+                <form class="todo-form">
+                    <input type="text" class="todo-input" placeholder="Add a new task...">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </form>
+                <ul class="todo-list">
+                    <li class="todo-item">
+                        <input type="checkbox" class="todo-checkbox">
+                        <span class="todo-text">Client meeting preparation</span>
+                        <span class="priority-badge priority-low">Low</span>
+                        <div class="todo-actions">
+                            <button class="btn-icon">📝</button>
+                            <button class="btn-icon">🗑️</button>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // Add basic interactivity
+        document.querySelectorAll('.todo-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const todoText = e.target.nextElementSibling;
+                todoText.classList.toggle('completed');
+            });
+        });
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelector('.filter-btn.active').classList.remove('active');
+                e.target.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
