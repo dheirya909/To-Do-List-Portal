@@ -6,6 +6,7 @@
     <title>Professional Todo Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
+        /* Previous CSS styles remain the same */
         :root {
             --primary: #2563eb;
             --secondary: #3b82f6;
@@ -150,6 +151,8 @@
 
         .btn-icon {
             padding: 0.25rem;
+            border: none;
+            background: none;
             border-radius: 0.25rem;
             cursor: pointer;
             opacity: 0.7;
@@ -160,25 +163,27 @@
             opacity: 1;
         }
 
-        .filters {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
+        .completed {
+            text-decoration: line-through;
+            opacity: 0.7;
         }
 
-        .filter-btn {
-            background: none;
-            border: none;
-            color: var(--text);
-            cursor: pointer;
-            padding: 0.25rem 0.5rem;
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-1rem);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .priority-select {
+            padding: 0.5rem;
             border-radius: 0.25rem;
-            transition: all 0.3s ease;
-        }
-
-        .filter-btn.active {
-            background: var(--primary);
-            color: white;
+            border: 1px solid #e2e8f0;
+            margin-right: 0.5rem;
         }
 
         .priority-badge {
@@ -202,168 +207,119 @@
             background: var(--success);
             color: white;
         }
-
-        .completed {
-            text-decoration: line-through;
-            opacity: 0.7;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-1rem);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            text-align: center;
-            box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.1);
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        .stat-label {
-            color: var(--text);
-            font-size: 0.875rem;
-        }
-
-        @media (max-width: 640px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            .todo-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .stats {
-                grid-template-columns: 1fr;
-            }
-        }
     </style>
 </head>
 <body>
     <header>
         <div class="container">
             <h1 class="app-title">Task Master Pro</h1>
-            <div class="filters">
-                <button class="filter-btn active">All</button>
-                <button class="filter-btn">Active</button>
-                <button class="filter-btn">Completed</button>
-            </div>
         </div>
     </header>
 
     <main class="container">
-        <div class="stats animate__animated animate__fadeIn">
-            <div class="stat-card">
-                <div class="stat-number">12</div>
-                <div class="stat-label">Total Tasks</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">5</div>
-                <div class="stat-label">Completed</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">7</div>
-                <div class="stat-label">Remaining</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">3</div>
-                <div class="stat-label">High Priority</div>
-            </div>
-        </div>
-
         <div class="todo-grid">
             <section class="todo-section animate__animated animate__fadeIn">
                 <h2 class="section-title">Today's Tasks</h2>
-                <form class="todo-form">
-                    <input type="text" class="todo-input" placeholder="Add a new task...">
+                <form class="todo-form" id="todoForm">
+                    <input type="text" class="todo-input" placeholder="Add a new task..." required>
+                    <select class="priority-select">
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
                     <button type="submit" class="btn btn-primary">Add</button>
                 </form>
-                <ul class="todo-list">
-                    <li class="todo-item">
-                        <input type="checkbox" class="todo-checkbox">
-                        <span class="todo-text">Complete project presentation</span>
-                        <span class="priority-badge priority-high">High</span>
-                        <div class="todo-actions">
-                            <button class="btn-icon">📝</button>
-                            <button class="btn-icon">🗑️</button>
-                        </div>
-                    </li>
-                    <li class="todo-item">
-                        <input type="checkbox" class="todo-checkbox" checked>
-                        <span class="todo-text completed">Review team updates</span>
-                        <span class="priority-badge priority-medium">Medium</span>
-                        <div class="todo-actions">
-                            <button class="btn-icon">📝</button>
-                            <button class="btn-icon">🗑️</button>
-                        </div>
-                    </li>
-                </ul>
-            </section>
-
-            <section class="todo-section animate__animated animate__fadeIn">
-                <h2 class="section-title">Upcoming Tasks</h2>
-                <form class="todo-form">
-                    <input type="text" class="todo-input" placeholder="Add a new task...">
-                    <button type="submit" class="btn btn-primary">Add</button>
-                </form>
-                <ul class="todo-list">
-                    <li class="todo-item">
-                        <input type="checkbox" class="todo-checkbox">
-                        <span class="todo-text">Client meeting preparation</span>
-                        <span class="priority-badge priority-low">Low</span>
-                        <div class="todo-actions">
-                            <button class="btn-icon">📝</button>
-                            <button class="btn-icon">🗑️</button>
-                        </div>
-                    </li>
-                </ul>
+                <ul class="todo-list" id="todoList"></ul>
             </section>
         </div>
     </main>
 
     <script>
-        // Add basic interactivity
-        document.querySelectorAll('.todo-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                const todoText = e.target.nextElementSibling;
-                todoText.classList.toggle('completed');
-            });
-        });
+        document.addEventListener('DOMContentLoaded', () => {
+            const todoForm = document.getElementById('todoForm');
+            const todoList = document.getElementById('todoList');
+            const todoInput = todoForm.querySelector('.todo-input');
+            const prioritySelect = todoForm.querySelector('.priority-select');
 
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelector('.filter-btn.active').classList.remove('active');
-                e.target.classList.add('active');
+            // Function to create a new todo item
+            function createTodoItem(text, priority) {
+                const li = document.createElement('li');
+                li.className = 'todo-item animate__animated animate__slideInLeft';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'todo-checkbox';
+                
+                const span = document.createElement('span');
+                span.className = 'todo-text';
+                span.textContent = text;
+                
+                const priorityBadge = document.createElement('span');
+                priorityBadge.className = `priority-badge priority-${priority}`;
+                priorityBadge.textContent = priority.charAt(0).toUpperCase() + priority.slice(1);
+                
+                const actions = document.createElement('div');
+                actions.className = 'todo-actions';
+                
+                const editButton = document.createElement('button');
+                editButton.className = 'btn-icon';
+                editButton.textContent = '📝';
+                editButton.addEventListener('click', () => {
+                    const newText = prompt('Edit task:', text);
+                    if (newText) {
+                        span.textContent = newText;
+                    }
+                });
+                
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'btn-icon';
+                deleteButton.textContent = '🗑️';
+                deleteButton.addEventListener('click', () => {
+                    li.classList.add('animate__slideOutRight');
+                    setTimeout(() => li.remove(), 300);
+                });
+                
+                actions.appendChild(editButton);
+                actions.appendChild(deleteButton);
+                
+                li.appendChild(checkbox);
+                li.appendChild(span);
+                li.appendChild(priorityBadge);
+                li.appendChild(actions);
+                
+                return li;
+            }
+
+            // Handle form submission
+            todoForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const text = todoInput.value.trim();
+                const priority = prioritySelect.value;
+                
+                if (text) {
+                    const todoItem = createTodoItem(text, priority);
+                    todoList.appendChild(todoItem);
+                    todoInput.value = '';
+                }
+            });
+
+            // Handle checkbox changes
+            todoList.addEventListener('change', (e) => {
+                if (e.target.classList.contains('todo-checkbox')) {
+                    const todoText = e.target.nextElementSibling;
+                    todoText.classList.toggle('completed');
+                }
+            });
+
+            // Add some example todos
+            const examples = [
+                { text: "Complete project presentation", priority: "high" },
+                { text: "Review team updates", priority: "medium" }
+            ];
+
+            examples.forEach(example => {
+                const todoItem = createTodoItem(example.text, example.priority);
+                todoList.appendChild(todoItem);
             });
         });
     </script>
