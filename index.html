@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Todo Portal</title>
+    <title>Task Master Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
-        /* Previous CSS styles remain the same */
         :root {
             --primary: #2563eb;
             --secondary: #3b82f6;
@@ -49,6 +48,11 @@
             animation: fadeIn 1s ease-in;
         }
 
+        .app-description {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
         .todo-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -74,16 +78,29 @@
             color: var(--primary);
             border-bottom: 2px solid var(--primary);
             padding-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-count {
+            font-size: 0.875rem;
+            background-color: var(--primary);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 999px;
         }
 
         .todo-form {
             display: flex;
+            flex-wrap: wrap;
             gap: 0.5rem;
             margin-bottom: 1rem;
         }
 
         .todo-input {
             flex: 1;
+            min-width: 200px;
             padding: 0.5rem;
             border: 1px solid #e2e8f0;
             border-radius: 0.25rem;
@@ -115,8 +132,19 @@
             background: var(--secondary);
         }
 
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
         .todo-list {
             list-style: none;
+            max-height: 500px;
+            overflow-y: auto;
         }
 
         .todo-item {
@@ -127,6 +155,7 @@
             margin-bottom: 0.5rem;
             border-radius: 0.25rem;
             animation: slideIn 0.3s ease;
+            transition: background-color 0.2s ease;
         }
 
         .todo-item:hover {
@@ -142,6 +171,13 @@
 
         .todo-text {
             flex: 1;
+            transition: all 0.3s ease;
+        }
+
+        .todo-due-date {
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+            color: #64748b;
         }
 
         .todo-actions {
@@ -157,15 +193,42 @@
             cursor: pointer;
             opacity: 0.7;
             transition: opacity 0.3s ease;
+            font-size: 1rem;
         }
 
         .btn-icon:hover {
             opacity: 1;
         }
 
-        .completed {
+        .completed .todo-text {
             text-decoration: line-through;
             opacity: 0.7;
+        }
+
+        .completed {
+            background-color: #f1f5f9;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.25rem 0.75rem;
+            background: #e2e8f0;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
         }
 
         @keyframes slideIn {
@@ -179,7 +242,7 @@
             }
         }
 
-        .priority-select {
+        .priority-select, .due-date-input {
             padding: 0.5rem;
             border-radius: 0.25rem;
             border: 1px solid #e2e8f0;
@@ -191,6 +254,7 @@
             border-radius: 999px;
             font-size: 0.75rem;
             margin-left: 0.5rem;
+            white-space: nowrap;
         }
 
         .priority-high {
@@ -207,120 +271,415 @@
             background: var(--success);
             color: white;
         }
+
+        .date-overdue {
+            color: var(--danger);
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 0.5rem;
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.25rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+        }
+
+        @media (max-width: 640px) {
+            .todo-form {
+                flex-direction: column;
+            }
+            
+            .search-bar {
+                max-width: 100%;
+                margin-bottom: 1rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
     <header>
         <div class="container">
             <h1 class="app-title">Task Master Pro</h1>
+            <p class="app-description">Your tasks are automatically saved - even when you close your browser!</p>
         </div>
     </header>
 
     <main class="container">
         <div class="todo-grid">
             <section class="todo-section animate__animated animate__fadeIn">
-                <h2 class="section-title">Today's Tasks</h2>
+                <h2 class="section-title">
+                    My Tasks
+                    <span class="task-count" id="taskCount">0</span>
+                </h2>
+                
+                <div class="controls">
+                    <div class="search-bar">
+                        <input type="text" class="search-input" id="searchInput" placeholder="Search tasks...">
+                    </div>
+                    
+                    <div class="filters">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="active">Active</button>
+                        <button class="filter-btn" data-filter="completed">Completed</button>
+                    </div>
+                </div>
+                
                 <form class="todo-form" id="todoForm">
-                    <input type="text" class="todo-input" placeholder="Add a new task..." required>
-                    <select class="priority-select">
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
+                    <input type="text" class="todo-input" id="todoInput" placeholder="Add a new task..." required>
+                    <select class="priority-select" id="prioritySelect">
+                        <option value="low">Low Priority</option>
+                        <option value="medium" selected>Medium Priority</option>
+                        <option value="high">High Priority</option>
                     </select>
-                    <button type="submit" class="btn btn-primary">Add</button>
+                    <input type="date" class="due-date-input" id="dueDateInput">
+                    <button type="submit" class="btn btn-primary">Add Task</button>
                 </form>
+                
                 <ul class="todo-list" id="todoList"></ul>
+                
+                <div id="emptyState" class="empty-state">
+                    <p>No tasks yet. Add one above!</p>
+                </div>
+                
+                <div style="margin-top: 1rem">
+                    <button id="clearCompletedBtn" class="btn btn-danger">Clear Completed</button>
+                </div>
             </section>
         </div>
     </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
             const todoForm = document.getElementById('todoForm');
             const todoList = document.getElementById('todoList');
-            const todoInput = todoForm.querySelector('.todo-input');
-            const prioritySelect = todoForm.querySelector('.priority-select');
-
+            const todoInput = document.getElementById('todoInput');
+            const prioritySelect = document.getElementById('prioritySelect');
+            const dueDateInput = document.getElementById('dueDateInput');
+            const taskCount = document.getElementById('taskCount');
+            const searchInput = document.getElementById('searchInput');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const clearCompletedBtn = document.getElementById('clearCompletedBtn');
+            const emptyState = document.getElementById('emptyState');
+            
+            // Set today as the default date
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            dueDateInput.value = formattedDate;
+            
+            // App state
+            let todos = [];
+            let currentFilter = 'all';
+            
+            // Load todos from localStorage
+            function loadTodos() {
+                const storedTodos = localStorage.getItem('taskMasterTodos');
+                if (storedTodos) {
+                    todos = JSON.parse(storedTodos);
+                    renderTodos();
+                }
+            }
+            
+            // Save todos to localStorage
+            function saveTodos() {
+                localStorage.setItem('taskMasterTodos', JSON.stringify(todos));
+                updateTaskCount();
+            }
+            
+            // Update the task counter
+            function updateTaskCount() {
+                const activeCount = todos.filter(todo => !todo.completed).length;
+                taskCount.textContent = activeCount;
+            }
+            
+            // Create a unique ID for each todo
+            function generateId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+            
+            // Function to check if a date is in the past
+            function isDateOverdue(dateString) {
+                if (!dateString) return false;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const dueDate = new Date(dateString);
+                return dueDate < today;
+            }
+            
+            // Format date to be more readable
+            function formatDate(dateString) {
+                if (!dateString) return '';
+                const options = { month: 'short', day: 'numeric' };
+                return new Date(dateString).toLocaleDateString(undefined, options);
+            }
+            
             // Function to create a new todo item
-            function createTodoItem(text, priority) {
+            function createTodoElement(todo) {
                 const li = document.createElement('li');
-                li.className = 'todo-item animate__animated animate__slideInLeft';
+                li.className = 'todo-item';
+                li.dataset.id = todo.id;
+                
+                if (todo.completed) {
+                    li.classList.add('completed');
+                }
                 
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.className = 'todo-checkbox';
+                checkbox.checked = todo.completed;
                 
-                const span = document.createElement('span');
-                span.className = 'todo-text';
-                span.textContent = text;
+                const textSpan = document.createElement('span');
+                textSpan.className = 'todo-text';
+                textSpan.textContent = todo.text;
+                
+                // Create due date element
+                let dueDateSpan = '';
+                if (todo.dueDate) {
+                    dueDateSpan = document.createElement('span');
+                    dueDateSpan.className = 'todo-due-date';
+                    dueDateSpan.textContent = formatDate(todo.dueDate);
+                    
+                    if (isDateOverdue(todo.dueDate) && !todo.completed) {
+                        dueDateSpan.classList.add('date-overdue');
+                    }
+                }
                 
                 const priorityBadge = document.createElement('span');
-                priorityBadge.className = `priority-badge priority-${priority}`;
-                priorityBadge.textContent = priority.charAt(0).toUpperCase() + priority.slice(1);
+                priorityBadge.className = `priority-badge priority-${todo.priority}`;
+                priorityBadge.textContent = todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1);
                 
                 const actions = document.createElement('div');
                 actions.className = 'todo-actions';
                 
                 const editButton = document.createElement('button');
                 editButton.className = 'btn-icon';
-                editButton.textContent = '📝';
-                editButton.addEventListener('click', () => {
-                    const newText = prompt('Edit task:', text);
-                    if (newText) {
-                        span.textContent = newText;
-                    }
-                });
+                editButton.innerHTML = '✏️';
+                editButton.title = 'Edit';
                 
                 const deleteButton = document.createElement('button');
                 deleteButton.className = 'btn-icon';
-                deleteButton.textContent = '🗑️';
-                deleteButton.addEventListener('click', () => {
-                    li.classList.add('animate__slideOutRight');
-                    setTimeout(() => li.remove(), 300);
-                });
+                deleteButton.innerHTML = '🗑️';
+                deleteButton.title = 'Delete';
                 
                 actions.appendChild(editButton);
                 actions.appendChild(deleteButton);
                 
                 li.appendChild(checkbox);
-                li.appendChild(span);
+                li.appendChild(textSpan);
+                if (dueDateSpan) {
+                    li.appendChild(dueDateSpan);
+                }
                 li.appendChild(priorityBadge);
                 li.appendChild(actions);
                 
                 return li;
             }
-
+            
+            // Add a new todo
+            function addTodo(text, priority, dueDate) {
+                const newTodo = {
+                    id: generateId(),
+                    text,
+                    priority,
+                    completed: false,
+                    dueDate,
+                    createdAt: new Date().toISOString()
+                };
+                
+                todos.unshift(newTodo); // Add to the beginning of the array
+                saveTodos();
+                renderTodos();
+            }
+            
+            // Edit an existing todo
+            function editTodo(id, newText, newPriority, newDueDate) {
+                const todoIndex = todos.findIndex(todo => todo.id === id);
+                if (todoIndex !== -1) {
+                    todos[todoIndex] = {
+                        ...todos[todoIndex],
+                        text: newText,
+                        priority: newPriority,
+                        dueDate: newDueDate
+                    };
+                    saveTodos();
+                    renderTodos();
+                }
+            }
+            
+            // Delete a todo
+            function deleteTodo(id) {
+                todos = todos.filter(todo => todo.id !== id);
+                saveTodos();
+                renderTodos();
+            }
+            
+            // Toggle todo completion status
+            function toggleTodoCompleted(id) {
+                const todoIndex = todos.findIndex(todo => todo.id === id);
+                if (todoIndex !== -1) {
+                    todos[todoIndex].completed = !todos[todoIndex].completed;
+                    saveTodos();
+                    renderTodos();
+                }
+            }
+            
+            // Filter todos based on current filter and search term
+            function filterTodos() {
+                const searchTerm = searchInput.value.toLowerCase();
+                
+                // First filter by completion status
+                let filteredTodos = [...todos];
+                
+                if (currentFilter === 'active') {
+                    filteredTodos = filteredTodos.filter(todo => !todo.completed);
+                } else if (currentFilter === 'completed') {
+                    filteredTodos = filteredTodos.filter(todo => todo.completed);
+                }
+                
+                // Then filter by search term
+                if (searchTerm) {
+                    filteredTodos = filteredTodos.filter(todo => 
+                        todo.text.toLowerCase().includes(searchTerm)
+                    );
+                }
+                
+                return filteredTodos;
+            }
+            
+            // Render the todo list
+            function renderTodos() {
+                const filteredTodos = filterTodos();
+                todoList.innerHTML = '';
+                
+                // Show or hide empty state
+                if (filteredTodos.length === 0) {
+                    emptyState.style.display = 'block';
+                    if (todos.length > 0) {
+                        emptyState.innerHTML = '<p>No matching tasks found.</p>';
+                    } else {
+                        emptyState.innerHTML = '<p>No tasks yet. Add one above!</p>';
+                    }
+                } else {
+                    emptyState.style.display = 'none';
+                }
+                
+                // Add each todo item to the list
+                filteredTodos.forEach(todo => {
+                    const todoElement = createTodoElement(todo);
+                    todoList.appendChild(todoElement);
+                });
+                
+                updateTaskCount();
+            }
+            
             // Handle form submission
             todoForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const text = todoInput.value.trim();
                 const priority = prioritySelect.value;
+                const dueDate = dueDateInput.value;
                 
                 if (text) {
-                    const todoItem = createTodoItem(text, priority);
-                    todoList.appendChild(todoItem);
+                    addTodo(text, priority, dueDate);
                     todoInput.value = '';
+                    // Keep the same priority selected for convenience
+                    dueDateInput.value = formattedDate; // Reset to today
+                    todoInput.focus();
                 }
             });
-
-            // Handle checkbox changes
-            todoList.addEventListener('change', (e) => {
+            
+            // Handle checkbox changes using event delegation
+            todoList.addEventListener('click', (e) => {
+                const todoItem = e.target.closest('.todo-item');
+                if (!todoItem) return;
+                
+                const todoId = todoItem.dataset.id;
+                
                 if (e.target.classList.contains('todo-checkbox')) {
-                    const todoText = e.target.nextElementSibling;
-                    todoText.classList.toggle('completed');
+                    toggleTodoCompleted(todoId);
+                } else if (e.target.classList.contains('btn-icon')) {
+                    if (e.target.innerHTML === '✏️') {
+                        // Find the todo
+                        const todo = todos.find(t => t.id === todoId);
+                        if (todo) {
+                            // Populate the form with the todo's values
+                            todoInput.value = todo.text;
+                            prioritySelect.value = todo.priority;
+                            dueDateInput.value = todo.dueDate || '';
+                            
+                            // Remove the old todo
+                            deleteTodo(todoId);
+                            
+                            // Focus the input for editing
+                            todoInput.focus();
+                        }
+                    } else if (e.target.innerHTML === '🗑️') {
+                        todoItem.classList.add('animate__animated', 'animate__fadeOutRight');
+                        todoItem.addEventListener('animationend', () => {
+                            deleteTodo(todoId);
+                        });
+                    }
                 }
             });
-
-            // Add some example todos
-            const examples = [
-                { text: "Complete project presentation", priority: "high" },
-                { text: "Review team updates", priority: "medium" }
-            ];
-
-            examples.forEach(example => {
-                const todoItem = createTodoItem(example.text, example.priority);
-                todoList.appendChild(todoItem);
+            
+            // Handle filter button clicks
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.dataset.filter;
+                    renderTodos();
+                });
             });
+            
+            // Handle search input
+            searchInput.addEventListener('input', () => {
+                renderTodos();
+            });
+            
+            // Handle clear completed button
+            clearCompletedBtn.addEventListener('click', () => {
+                todos = todos.filter(todo => !todo.completed);
+                saveTodos();
+                renderTodos();
+            });
+            
+            // Initial load
+            loadTodos();
+            
+            // Add sample todos if none exist
+            if (todos.length === 0) {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                
+                addTodo("Complete project presentation", "high", tomorrow.toISOString().split('T')[0]);
+                addTodo("Review team updates", "medium", formattedDate);
+                addTodo("Schedule weekly meeting", "low", formattedDate);
+            }
         });
     </script>
 </body>
